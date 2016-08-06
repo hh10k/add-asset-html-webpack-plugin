@@ -1,4 +1,5 @@
 /* eslint import/no-extraneous-dependencies: ["error", { "devDependencies": true }] */
+// @flow
 
 import path from 'path';
 import test from 'ava';

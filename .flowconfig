@@ -1,0 +1,9 @@
+[ignore]
+./lib/
+
+[include]
+
+[libs]
+
+[options]
+module.use_strict=true

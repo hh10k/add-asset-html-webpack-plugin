@@ -1,8 +1,12 @@
+// @flow
+
 import path from 'path';
 import crypto from 'crypto';
 import Promise from 'bluebird';
 
-function ensureTrailingSlash(string) {
+import type { ArrayOfAssets } from '../types';
+
+function ensureTrailingSlash(string: string): string {
   if (string.length && string.substr(-1, 1) !== '/') {
     return `${string}/`;
   }
@@ -11,7 +15,7 @@ function ensureTrailingSlash(string) {
 }
 
 // Copied from html-webpack-plugin
-function resolvePublicPath(compilation, filename) {
+function resolvePublicPath(compilation: Object, filename: string): string {
   /* istanbul ignore else */
   const publicPath = typeof compilation.options.output.publicPath !== 'undefined'
       ? compilation.options.output.publicPath
@@ -20,15 +24,15 @@ function resolvePublicPath(compilation, filename) {
   return ensureTrailingSlash(publicPath);
 }
 
-function resolveOutput(compilation, addedFilename, outputPath) {
+function resolveOutput(compilation: Object, addedFilename: string, outputPath: ?string): void {
   if (outputPath && outputPath.length) {
     compilation.assets[`${outputPath}/${addedFilename}`] = compilation.assets[addedFilename]; // eslint-disable-line no-param-reassign
     delete compilation.assets[addedFilename]; // eslint-disable-line no-param-reassign
   }
 }
 
-function addFileToAssets(compilation, htmlPluginData,
-  { filepath, typeOfAsset = 'js', includeSourcemap = true, hash = false, publicPath, outputPath }) {
+function addFileToAssets(compilation: Object, htmlPluginData: Object,
+  { filepath, typeOfAsset = 'js', includeSourcemap = true, hash = false, publicPath, outputPath }): Promise {
   if (!filepath) {
     const error = new Error('No filepath defined');
     compilation.errors.push(error);
@@ -36,7 +40,7 @@ function addFileToAssets(compilation, htmlPluginData,
   }
 
   return htmlPluginData.plugin.addFileToAssets(filepath, compilation)
-    .then(addedFilename => {
+    .then((addedFilename: string) => {
       let suffix = '';
       if (hash) {
         const md5 = crypto.createHash('md5');
@@ -68,7 +72,8 @@ function addFileToAssets(compilation, htmlPluginData,
 }
 
 // Visible for testing
-export default function (assets, compilation, htmlPluginData, callback) {
+export default function (assets: ArrayOfAssets, compilation: Object, htmlPluginData: Object,
+                                          callback: (error: ?Error, htmlPluginData: Object) => void): Promise {
   return Promise.mapSeries(assets, asset => addFileToAssets(compilation, htmlPluginData, asset))
     .then(() => callback(null, htmlPluginData))
     .catch(e => callback(e, htmlPluginData));
